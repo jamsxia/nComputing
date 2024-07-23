@@ -19,14 +19,15 @@ class SOM():
                 weight=0
                 for k in range(self.dimen):
                     weight+=(e-self.u[i,j,k])**2
-                weight**=1/2
-                if(weight<min):
-                    min=weight
-                    winner=self.u[i,j,:]
-                    location=(i,j)
+                    weight=np.sum((e-self.u[i,j,:])**2)
+                    weight**=1/2
+                    if(weight<min):
+                        min=weight
+                        winner=self.u[i,j,:]
+                        location=(i,j)
         return location
 
-    def adjustWeight(self, location, d,alpha):
+    def adjustWeight(self, location, d,alpha,e):
         bound=self.size-1
         x,y=location
         for i in range(x-d,x+d):
@@ -35,9 +36,9 @@ class SOM():
             for j in range(y-d, y+d):
                 if(j<0 or j>bound):
                     continue
-               self.u[i,j,:]+= alpha*(e)
+                self.u[i,j,:]+= alpha*(e-self.u[i,j,:])
                
-    def learn(self, T, alpha0, d0):
+    def learn(self, data,T, alpha0, d0):
 
         # Iterate t from 0 to T
         for t in range(T):
@@ -47,11 +48,8 @@ class SOM():
             d = int(np.ceil(d0 * (1 - t/T)))
             
             # Pick an input e from the training set at random
-            i = int(self.size * random.random())
-            j = int(self.size * random.random())
-            #print(self.u[i,j,:])
-            #e=np.random.choice(self.u[i,j,:])
-            e=np.random.choice(self.u[i,j])
+
+            e=data[np.random.randint(len(data))]
             #print(e)
 
 	    # Find the winning unit whose weights are closest to this e
@@ -59,7 +57,7 @@ class SOM():
             #print(c)
 
             # Loop over the neighbors of this winner, adjusting their weights
-            #self.adjustWeight(c,d,alpha)
+            self.adjustWeight(c,d,alpha,e)
 	    
 def plot(som, data):
 
@@ -72,22 +70,27 @@ def plot(som, data):
 
             # Plot the location of the weight as a red circle
             plt.plot(p[0], p[1], 'ro')
+            if(j<som.size-1):
+                plt.plot(som.u[j,k],som.u[j+1, k],"bo", linestyle="--")
+            if(k<som.size-1):
+                plt.plot(som.u[j,k],som.u[j, k+1],"bo",linestyle="--")
 
     plt.scatter(data[:,0], data[:,1], s=.2)
     plt.gca().set_aspect('equal')
+    plt.title("som")
     plt.show()
 
 def main():
 
-    # data = np.random.random((5000, 2))
-
     som = SOM(8, 2)
 
     data = np.random.random((5000, 2))
+    r = (data[:,0]-.5)**2 + (data[:,1]-.5)**2
+    #data=np.logical_and(r<0.05,r>0.2)
+    #print(data)
+    som.learn(data, 4000, 0.02, 4)
 
-    som.learn(4000, 0.02, 4)
-
-    # plot(som, data) 
+    plot(som, data) 
 
 if __name__ =="__main__":
 
