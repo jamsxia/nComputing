@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from tqdm import tqdm
 
 class SOM():
 
@@ -41,20 +42,18 @@ class SOM():
     def learn(self, data,T, alpha0, d0):
 
         # Iterate t from 0 to T
-        for t in range(T):
+        for t in tqdm(range(T)):
 
-	    # Compute current neighborhood radius d and learning rate alpha
+	        # Compute current neighborhood radius d and learning rate alpha
             alpha = alpha0 * (1 - t/T)
             d = int(np.ceil(d0 * (1 - t/T)))
             
             # Pick an input e from the training set at random
 
             e=data[np.random.randint(len(data))]
-            #print(e)
 
-	    # Find the winning unit whose weights are closest to this e
+	        # Find the winning unit whose weights are closest to this e
             c=self.findWinner(e)
-            #print(c)
 
             # Loop over the neighbors of this winner, adjusting their weights
             self.adjustWeight(c,d,alpha,e)
@@ -70,10 +69,19 @@ def plot(som, data):
 
             # Plot the location of the weight as a red circle
             plt.plot(p[0], p[1], 'ro')
-            if(j<som.size-1):
-                plt.plot(som.u[j,k],som.u[j+1, k],"bo", linestyle="--")
-            if(k<som.size-1):
-                plt.plot(som.u[j,k],som.u[j, k+1],"bo",linestyle="--")
+
+            # Plot line to neighbor in adjacent row
+            if j < som.size - 1:
+                nbr = som.u[j+1, k]
+                xs = [p[0], nbr[0]]
+                ys = [p[1], nbr[1]]
+                plt.plot(xs, ys, 'b')
+            if k < som.size - 1:
+                nbr = som.u[j, k+1]
+                xs = [p[0], nbr[0]]
+                ys = [p[1], nbr[1]]
+                plt.plot(xs, ys, 'b')
+
 
     plt.scatter(data[:,0], data[:,1], s=.2)
     plt.gca().set_aspect('equal')
@@ -86,8 +94,7 @@ def main():
 
     data = np.random.random((5000, 2))
     r = (data[:,0]-.5)**2 + (data[:,1]-.5)**2
-    #data=np.logical_and(r<0.05,r>0.2)
-    #print(data)
+    
     som.learn(data, 4000, 0.02, 4)
 
     plot(som, data) 
