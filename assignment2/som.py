@@ -85,24 +85,36 @@ def plot(som, data):
 
     plt.scatter(data[:,0], data[:,1], s=.2)
     plt.gca().set_aspect('equal')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
     plt.title("som")
     plt.show()
+
+
+
+def sqrdist(points):
+    '''
+    Returns Euclidean distances of points from (0.5, 0.5)
+    '''
+
+    return np.sqrt((points[:,0]-.5)**2 + (points[:,1]-.5)**2)
+
 
 def main():
 
     som = SOM(8, 2)
 
     data = np.random.random((5000, 2))
-    r = (data[:,0]-.5)**2 + (data[:,1]-.5)**2
-    logicalOutput=np.logical_and(r<0.2, r>0.1)
-    print(type(logicalOutput))
-    #data=np.select(logicalOutput,data)
-    data=np.where(logicalOutput, data)
-    print(data)
-    
-    #som.learn(data, 4000, 0.02, 4)
 
-    plot(som, data) 
+    disc1_indices = sqrdist(data) <  0.4
+
+    disc2_indices = sqrdist(data) > 0.3
+
+    ring = data[np.logical_and(disc1_indices, disc2_indices)]
+
+    som.learn(ring, 4000, 0.02, 4)
+
+    plot(som, ring)
 
 if __name__ =="__main__":
 
