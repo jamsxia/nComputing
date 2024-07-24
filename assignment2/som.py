@@ -94,8 +94,13 @@ def main():
 
     data = np.random.random((5000, 2))
     r = (data[:,0]-.5)**2 + (data[:,1]-.5)**2
+    logicalOutput=np.logical_and(r<0.2, r>0.1)
+    print(type(logicalOutput))
+    #data=np.select(logicalOutput,data)
+    data=np.where(logicalOutput, data)
+    print(data)
     
-    som.learn(data, 4000, 0.02, 4)
+    #som.learn(data, 4000, 0.02, 4)
 
     plot(som, data) 
 
