@@ -24,11 +24,12 @@ class Hopfield():
         copy_data=np.copy(pattern)
         for iter in range(niter):
             #pattern+=np.outer(pattern, self.T)
-            for j in range(len(pattern)):
-                for i in range(j+1, len(pattern)):
+            for i in range(len(pattern)):
+                for j in range(i+1, len(pattern)):
                     copy_data[j]+=copy_data[i]*self.T[i,j]
-        return (np.rint(copy_data))
-        #return np.round(copy_data, 0)
+        #return (np.rint(copy_data))
+        #return np.round(copy_data,1)
+        return np.where(copy_data>=0, 1, 0)
 def cosine(a,b):
     return np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b))
 
@@ -68,17 +69,18 @@ def main():
     print('\nPart 4: Recovering small patterns with a Hopfield net -----------------------------------')
     net = Hopfield(30)
     net.learn(data)
-    testData=np.round(np.random.random(30))
+    print('\n\nRecover pattern, no noise:') 
+    testData=np.round(np.random.randint(2,size=30))
     print("Input:"+np.array_str(testData))
     print("Output:"+np.array_str(net.test(testData)))
-    print('\n\nRecover pattern, no noise:')
     print("Vector cosine="+str(cosine(testData,net.test(testData))))
+    print('\n\nRecover pattern, 25% noise:')
     noiseData=noisy_copy(testData,0.25)
     print("Input:"+np.array_str(noiseData))
     print("Output:"+np.array_str(net.test(noiseData)))
     print("Original:"+np.array_str(testData))
     print("Vector cosine="+str(cosine(noiseData,net.test(noiseData))))
-
+'''
     print("Part 5: Recovering big patterns ----------------------------------------------------")
     newData = random_array(10, 1000)
     print("Confusion matrix for 1000-element vectors with 25% noise")
@@ -86,7 +88,7 @@ def main():
     print('\n\nRecover pattern, no noise:')
     for i in range(len(newData)):
         print("Vector cosine on pattern %s = %s"%(str(i), str(cosine(testData,net.test(testData)))))
-
+'''
 
 
 
